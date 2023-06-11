@@ -12,7 +12,9 @@ from sqlalchemy.orm import Session
 #################################################
 # Database Setup
 #################################################
+
 db_path = Path(__file__).parent / "Resources/hawaii.sqlite"
+
 # threading error fix: https://stackoverflow.com/questions/48218065/objects-created-in-a-thread-can-only-be-used-in-that-same-thread
 engine = create_engine("sqlite:///" + str(db_path),
                        connect_args={'check_same_thread': False})
@@ -29,10 +31,10 @@ Station = Base.classes["station"]
 session = Session(bind=engine)
 
 # Constants
-def most_active_station() -> str:
-    """Gives the most active station from the database
+def active_station() -> str:
+    """most active station from the database
 
-    Should be 'USC00519281'
+     'USC00519281'
 
     :return: string station
     """
@@ -42,12 +44,12 @@ def most_active_station() -> str:
                              .group_by(Measurement.station)\
                              .order_by(desc("count"))\
                              .all()
-    return active_stations[0].station  # selecting from named tuple
+    return active_stations[0].station 
 
 # Constants
 MOST_RECENT_DATE = dt.datetime.strptime(session.query(func.max(Measurement.date)).scalar(), r"%Y-%m-%d").date()
 ONE_YEAR_PRIOR_DATE = MOST_RECENT_DATE - dt.timedelta(days=365)
-MOST_ACTIVE_STATION = most_active_station()
+MOST_ACTIVE_STATION = active_station()
 
 #################################################
 # Flask Setup
@@ -61,7 +63,7 @@ app = Flask(__name__)
 #################################################
 @app.route("/")
 def home():
-    """Starting page listing all the routes"""
+    
     return"""
           <h1>Welcome</h1>
           <h2>Simple climate app of Hawaii data</h2>
@@ -80,16 +82,7 @@ def home():
 @app.route("/api/v1.0/precipitation")
 def precipitation():
     """
-    Return the last 12 months of precipitation data for all stations.
-
-    Data in the form:
-    [
-      {
-        "2016-08-23": 0.0
-      },
-      ...
-    ]
-
+    Return 12 months of precipitation data for all stations.
     :return: json precipitation data
     """
     last_12_months = session.query(Measurement.date,
@@ -104,9 +97,9 @@ def precipitation():
 
 @app.route("/api/v1.0/stations")
 def stations():
-    """Returns data with list of all stations
+    """Returns data of all stations
 
-    Data in the form:
+    Data:
     {
       "stations":[
          "USC00519397",
@@ -123,9 +116,9 @@ def stations():
 
 @app.route("/api/v1.0/tobs")
 def tobs():
-    """Returns temperature data for the most active station in the last year of the data set.
+    """ temperature data for the most active station in the last year of the data set.
 
-    Data in the form:
+    Data:
     [
       {
         "2016-08-23": 77.0
@@ -146,7 +139,7 @@ def tobs():
 
 @app.route("/api/v1.0/<start>")
 def start(start: str):
-    """Return temperature data from the `start` date to the end of the data set.
+    """temperature data from the `start` date to the end of the data set.
 
     :param start: string start date in YYYY-MM-DD form
     :return: json data
@@ -158,7 +151,7 @@ def start(start: str):
 
 @app.route("/api/v1.0/<start>/<end>")
 def start_end_range(start: str, end: Union[str, dt.date]):
-    """Return temperature data in the date range `start` to `end`.
+    """ temperature data in the date range `start` to `end`.
 
     :param start: string start date in YYYY-MM-DD form
     :param end: string end date in YYYY-MM-DD form
